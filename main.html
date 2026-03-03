@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smart Expense Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+<style>
+body{
+    margin:0;
+    font-family:'Roboto',sans-serif;
+    background:linear-gradient(135deg,#667eea,#764ba2);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+}
+
+.container{
+    background:#fff;
+    padding:40px;
+    border-radius:20px;
+    box-shadow:0 20px 40px rgba(0,0,0,0.2);
+    width:400px;
+    text-align:center;
+}
+
+h1{
+    margin-bottom:20px;
+    color:#333;
+}
+
+input, button{
+    width:90%;
+    padding:12px;
+    margin:10px 0;
+    border-radius:10px;
+    border:1px solid #ccc;
+    font-size:14px;
+}
+
+button{
+    border:none;
+    background:linear-gradient(45deg,#667eea,#764ba2);
+    color:white;
+    font-weight:bold;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+button:hover{
+    transform:translateY(-2px);
+}
+
+.menu-btn{
+    display:block;
+    padding:12px;
+    margin:10px auto;
+    border-radius:12px;
+    background:linear-gradient(45deg,#667eea,#764ba2);
+    color:white;
+    text-decoration:none;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+.menu-btn:hover{
+    transform:translateY(-3px);
+}
+
+.hidden{
+    display:none;
+}
+
+.expense-item{
+    text-align:left;
+    margin:8px 0;
+    font-size:14px;
+    border-bottom:1px solid #eee;
+    padding-bottom:5px;
+}
+
+.total{
+    font-size:24px;
+    font-weight:bold;
+    color:#764ba2;
+    margin-top:15px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<!-- MENU SECTION -->
+<div id="menuSection">
+    <h1>Expense Tracker</h1>
+    <button class="menu-btn" onclick="showSection('addSection')">➕ Add Expense</button>
+    <button class="menu-btn" onclick="showSection('viewSection')">📋 View Expenses</button>
+    <button class="menu-btn" onclick="showSection('totalSection')">💰 View Total</button>
+    <button class="menu-btn" onclick="clearExpenses()">🗑 Clear All</button>
+</div>
+
+<!-- ADD SECTION -->
+<div id="addSection" class="hidden">
+    <h1>Add Expense</h1>
+    <form id="expenseForm">
+        <input type="text" id="desc" placeholder="Description" required>
+        <input type="number" id="amt" placeholder="Amount" step="0.01" required>
+        <input type="date" id="date" required>
+        <button type="submit">Add Expense</button>
+    </form>
+    <button class="menu-btn" onclick="showSection('menuSection')">⬅ Back</button>
+</div>
+
+<!-- VIEW SECTION -->
+<div id="viewSection" class="hidden">
+    <h1>All Expenses</h1>
+    <div id="expenseList"></div>
+    <button class="menu-btn" onclick="showSection('menuSection')">⬅ Back</button>
+</div>
+
+<!-- TOTAL SECTION -->
+<div id="totalSection" class="hidden">
+    <h1>Total Expenses</h1>
+    <div id="totalAmt" class="total">₹0.00</div>
+    <button class="menu-btn" onclick="showSection('menuSection')">⬅ Back</button>
+</div>
+
+</div>
+
+<script>
+
+function showSection(sectionId){
+    document.querySelectorAll(".container > div").forEach(div=>{
+        div.classList.add("hidden");
+    });
+    document.getElementById(sectionId).classList.remove("hidden");
+
+    if(sectionId === "viewSection") loadExpenses();
+    if(sectionId === "totalSection") calculateTotal();
+}
+
+document.getElementById("expenseForm").addEventListener("submit", function(e){
+    e.preventDefault();
+
+    let expenses = JSON.parse(localStorage.getItem("expenses") || "[]");
+
+    expenses.push({
+        description: document.getElementById("desc").value,
+        amount: parseFloat(document.getElementById("amt").value),
+        date: document.getElementById("date").value
+    });
+
+    localStorage.setItem("expenses", JSON.stringify(expenses));
+
+    alert("✅ Expense added!");
+    this.reset();
+    showSection("menuSection");
+});
+
+function loadExpenses(){
+    let expenses = JSON.parse(localStorage.getItem("expenses") || "[]");
+    let list = document.getElementById("expenseList");
+    list.innerHTML = "";
+
+    if(expenses.length === 0){
+        list.innerHTML = "<p>No expenses added yet.</p>";
+        return;
+    }
+
+    expenses.forEach(e=>{
+        let div = document.createElement("div");
+        div.className = "expense-item";
+        div.innerText = `${e.date} | ${e.description} - ₹${e.amount.toFixed(2)}`;
+        list.appendChild(div);
+    });
+}
+
+function calculateTotal(){
+    let expenses = JSON.parse(localStorage.getItem("expenses") || "[]");
+    let total = expenses.reduce((sum,e)=>sum + e.amount, 0);
+    document.getElementById("totalAmt").innerText = "₹" + total.toFixed(2);
+}
+
+function clearExpenses(){
+    localStorage.removeItem("expenses");
+    alert("All expenses cleared!");
+}
+
+</script>
+
+</body>
+</html>
